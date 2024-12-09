@@ -2,11 +2,10 @@ from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram import Bot
 from datetime import datetime
-from database import insert_student, check_student, insert_assignment, select_assignment, get_assignment, insert_file_metadata, insert_submission, convert_file_name
+from database import insert_student, get_all_admins, check_student, insert_assignment, select_assignment, get_assignment, insert_file_metadata, insert_submission, convert_file_name
 from utils import StudentAddForm, AssignmentCreateForm, SubmitAssignmentForm
 from keyboards import cancel_btn, submit_assignment_btn, submit_a_btn
 from filters import validate_date, validate_time
-import os
 
 async def add_student(message: Message, state: FSMContext):
     await message.answer(text="Enter Student Full Name: ", reply_markup=cancel_btn)
@@ -93,7 +92,6 @@ async def submit_assignment(message: Message, state: FSMContext):
         await message.answer(text="Choose assignment to submit")
     else:
         await message.answer(text="No Assignments")
-    # await state.set_state(SubmitAssignmentForm.file)
 
 async def submit_callback(call: CallbackQuery, bot: Bot, state: FSMContext):
     a_id = call.data.split('_')[1]
@@ -136,6 +134,11 @@ async def get_file(message: Message, state: FSMContext, bot: Bot):
                 'submitted_at': datetime.now()
             }
             submitted = await insert_submission(submission)
+
+            chats = await get_all_admins()
+            for admin in chats:
+                await bot.send_message(text=f"Student: {student['name']} submitted assignment: {assignment['title']}", chat_id=admin['tgid'])
+                await bot.send_document(document=file_id, chat_id=admin['tgid'])
 
             await message.reply(f"File submitted successfully", reply_markup=submit_a_btn)
             await state.clear()
