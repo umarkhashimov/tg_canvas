@@ -8,7 +8,7 @@ import local_settings as st
 import handlers
 import filters
 from commands import set_commands, CancelCommand
-from utils import StudentAddForm
+from utils import StudentAddForm, AssignmentCreateForm as AForm
 from database import default_admins
 
 
@@ -43,10 +43,15 @@ async def start():
     dp.message.register(greet, CommandStart(), filters.IsStudent())
 
     dp.message.register(handlers.cancel_action, CancelCommand(), F.text)
+    dp.message.register(handlers.create_assignment, filters.IsAdmin(), Command('create_assignment'))
     dp.message.register(handlers.add_student, filters.IsAdmin(), Command('student_add'))
     dp.message.register(handlers.get_name,  F.text, filters.IsAdmin(), StudentAddForm.name)
     dp.message.register(handlers.get_tgid,  F.text, filters.IsAdmin(), StudentAddForm.tgid)
 
+    dp.message.register(handlers.get_title, F.text, filters.IsAdmin(), AForm.title)
+    dp.message.register(handlers.get_descrition, F.text, filters.IsAdmin(), AForm.description)
+    dp.message.register(handlers.get_date, F.text, filters.IsAdmin(), AForm.due_date)
+    dp.message.register(handlers.get_time, F.text, filters.IsAdmin(), AForm.due_time)
 
 
     try:

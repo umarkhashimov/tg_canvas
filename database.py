@@ -1,5 +1,6 @@
 import local_settings as st
 from pymongo import MongoClient
+from datetime import datetime
 
 
 client = MongoClient(st.db_connection)
@@ -30,6 +31,14 @@ async def insert_student(data):
         
     try:
         result = db['students'].insert_one(data)
+        return True
+    except:
+        return False
+
+
+async def insert_assignment(data):
+    try:
+        result = db['assignments'].insert_one(data)
         return True
     except:
         return False

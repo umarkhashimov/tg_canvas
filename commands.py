@@ -16,6 +16,7 @@ async def set_commands(bot: Bot):
         BotCommand(command='start', description='Start the bot'),
         BotCommand(command='help', description="About bot"),
         BotCommand(command='group_create', description="Create new group"),
+        BotCommand(command='create_assignment', description="Create new assignment"),
         BotCommand(command='student_add', description="Add new student"),
     ]
 

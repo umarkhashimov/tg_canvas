@@ -6,5 +6,11 @@ class StudentAddForm(StatesGroup):
     tgid = State()
 
 
+class AssignmentCreateForm(StatesGroup):
+    title = State()
+    description = State()
+    due_date = State()
+    due_time = State()
+
 # admins
 # students
