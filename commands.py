@@ -1,7 +1,8 @@
 from aiogram import Bot
+from aiogram.types import Message
 from aiogram.types import BotCommand, BotCommandScopeChat, BotCommandScopeDefault
 from database import check_admin
-
+from aiogram.filters import BaseFilter
 
 async def set_commands(bot: Bot, tgid):
     
@@ -20,3 +21,14 @@ async def set_commands(bot: Bot, tgid):
 
     if await check_admin(tgid):
         await bot.set_my_commands(commands=admin_commands, scope=BotCommandScopeChat(chat_id=tgid))
+
+
+
+class CancelCommand(BaseFilter):
+    
+    async def __call__(self, message: Message) -> bool:
+        if message.text.lower() == "cancel":
+            return True
+        else:
+            return False
+        

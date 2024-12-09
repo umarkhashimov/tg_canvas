@@ -7,7 +7,7 @@ from aiogram.types import Message
 import local_settings as st
 import handlers
 import filters
-from commands import set_commands
+from commands import set_commands, CancelCommand
 from utils import StudentAddForm
 from database import default_admins
 
@@ -38,13 +38,14 @@ async def start():
     
     # dp.startup.register(start_notify)
     # dp.shutdown.register(stop_notify)
-    # dp.message.register(greet, CommandStart)
     dp.message.register(greet_admin, CommandStart(), filters.IsAdmin())
     dp.message.register(greet, CommandStart(), filters.IsStudent())
 
+    dp.message.register(handlers.cancel_action, CancelCommand(), F.text)
     dp.message.register(handlers.add_student, filters.IsAdmin(), Command('student_add'))
     dp.message.register(handlers.get_name,  F.text, filters.IsAdmin(), StudentAddForm.name)
     dp.message.register(handlers.get_tgid,  F.text, filters.IsAdmin(), StudentAddForm.tgid)
+
 
 
     try:

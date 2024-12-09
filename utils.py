@@ -4,3 +4,7 @@ from aiogram.fsm.state import State, StatesGroup
 class StudentAddForm(StatesGroup):
     name = State()
     tgid = State()
+
+
+# admins
+# students
