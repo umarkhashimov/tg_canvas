@@ -1,9 +1,9 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
+from datetime import datetime
 
 import local_settings as st
 from database import check_admin, check_student
-
 
 class IsAdmin(BaseFilter):
 
@@ -25,3 +25,19 @@ class IsStudent(BaseFilter):
             return True
         else:
             return False
+
+
+def validate_date(date_str, date_format="%d-%m-%Y"):
+    try:
+        datetime.strptime(date_str, date_format)
+        return True 
+    except ValueError:
+        return False  
+
+
+def validate_time(time_str, time_format="%H:%M"):
+    try:
+        datetime.strptime(time_str, time_format)
+        return True 
+    except ValueError:
+        return False  

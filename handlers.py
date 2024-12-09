@@ -5,6 +5,7 @@ from database import insert_student, check_student, insert_assignment
 from commands import set_commands
 from utils import StudentAddForm, AssignmentCreateForm
 from keyboards import cancel_btn
+from filters import validate_date, validate_time
 
 async def add_student(message: Message, state: FSMContext):
     await message.answer(text="Enter Student Full Name: ", reply_markup=cancel_btn)
@@ -53,27 +54,35 @@ async def get_descrition(message: Message, state: FSMContext):
     await state.set_state(AssignmentCreateForm.due_date)
 
 async def get_date(message: Message, state: FSMContext):
-    await state.update_data(due_date=message.text)
-    await message.answer(text=f"Please enter due time 00:00. \nExample: {datetime.now().time().strftime('%H:%M')}", reply_markup=cancel_btn)
-    await state.set_state(AssignmentCreateForm.due_time)
+    if validate_date(message.text):
+        await state.update_data(due_date=message.text)
+        await message.answer(text=f"Please enter due time 00:00. \nExample: {datetime.now().time().strftime('%H:%M')}", reply_markup=cancel_btn)
+        await state.set_state(AssignmentCreateForm.due_time)
+    else:
+        await message.answer(text="Enter Valid date format")
 
 async def get_time(message: Message, state: FSMContext):
-    await state.update_data(due_time=message.text)
-    
-    data = await state.get_data()
-    datetime_obj = datetime.strptime(f"{data['due_date']} {data['due_time']}", "%d-%m-%Y %H:%M")
+    if validate_date(message.text):
+        await state.update_data(due_time=message.text)
+        
+        data = await state.get_data()
+        datetime_obj = datetime.strptime(f"{data['due_date']} {data['due_time']}", "%d-%m-%Y %H:%M")
 
-    assignment = {
-        'title': data['title'],
-        'description': data['description'],
-        'due': datetime_obj
-    }
+        assignment = {
+            'title': data['title'],
+            'description': data['description'],
+            'due': datetime_obj
+        }
 
+        if await insert_assignment(assignment):
+            await message.answer(f"Assignment created.\nTitle: {data['title']}\nDescription: {data['description']}\nDue: {datetime_obj}")
+        else:
+            await message.answer(text='A problem Occured')
 
-    if await insert_assignment(assignment):
-        await message.answer(f"Assignment created.\nTitle: {data['title']}\nDescription: {data['description']}\nDue: {datetime_obj}")
+        await state.clear()
     else:
-        await message.answer(text='A problem Occured')
+        await message.answer(text="Enter Valid time format")
 
-    await state.clear()
+
+
     
