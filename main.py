@@ -8,23 +8,23 @@ import local_settings as st
 import handlers
 import filters
 from commands import set_commands
-from database import db
 from utils import StudentAddForm
+from database import default_admins
 
 bot = Bot(token=st.TOKEN)
 
 async def start_notify(bot: Bot):
-    for uid in st.ADMIN_LIST:
+    for uid in st.DEFAULT_ADMINS:
         await bot.send_message(uid, text='Bot started')
 
 async def stop_notify(bot: Bot):
-    for uid in st.ADMIN_LIST:
+    for uid in st.DEFAULT_ADMINS:
         await bot.send_message(uid, text='Bot stopped')
 
 async def greet_admin(message: Message, bot: Bot):
     data = message.model_config.get("filter_result")
     await set_commands(bot=bot,tgid=message.from_user.id)
-    await message.answer(f"Welcome {data['name']}")
+    await message.answer(f"Welcome admin {data['name']}")
 
 async def greet(message: Message):
     data = message.model_config.get("filter_result")
@@ -34,7 +34,7 @@ async def greet(message: Message):
 async def start():
     # logging.basicConfig(level=logging.INFO)
     dp = Dispatcher()
-
+    await default_admins()
     
     # dp.startup.register(start_notify)
     # dp.shutdown.register(stop_notify)
