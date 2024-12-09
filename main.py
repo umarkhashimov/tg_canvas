@@ -1,7 +1,7 @@
 import asyncio
 # import logging
 from aiogram import Bot, Dispatcher, F
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
 
 import local_settings as st
@@ -9,6 +9,7 @@ import handlers
 import filters
 from commands import set_commands
 from database import db
+from utils import StudentAddForm
 
 bot = Bot(token=st.TOKEN)
 
@@ -40,6 +41,10 @@ async def start():
     # dp.message.register(greet, CommandStart)
     dp.message.register(greet_admin, CommandStart(), filters.IsAdmin())
     dp.message.register(greet, CommandStart(), filters.IsStudent())
+
+    dp.message.register(handlers.add_student, filters.IsAdmin(), Command('student_add'))
+    dp.message.register(handlers.get_name,  F.text, filters.IsAdmin(), StudentAddForm.name)
+    dp.message.register(handlers.get_tgid,  F.text, filters.IsAdmin(), StudentAddForm.tgid)
 
 
     try:

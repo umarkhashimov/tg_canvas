@@ -9,8 +9,16 @@ async def check_admin(tg_id: int) -> bool:
 
     return document 
 
-
 async def check_student(tg_id: int) -> bool:
     document = db['students'].find_one({'tg_id': str(tg_id)})
 
     return document 
+
+async def insert_student(data):
+        
+    try:
+        result = db['students'].insert_one(data)
+        queried_student = db['students'].find_one({"name": "Alice"})
+        return True
+    except:
+        return False
