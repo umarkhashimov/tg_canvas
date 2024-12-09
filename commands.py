@@ -15,7 +15,6 @@ async def set_commands(bot: Bot):
     admin_commands = [
         BotCommand(command='start', description='Start the bot'),
         BotCommand(command='help', description="About bot"),
-        BotCommand(command='group_create', description="Create new group"),
         BotCommand(command='create_assignment', description="Create new assignment"),
         BotCommand(command='student_add', description="Add new student"),
     ]
@@ -29,8 +28,20 @@ async def set_commands(bot: Bot):
 class CancelCommand(BaseFilter):
     
     async def __call__(self, message: Message) -> bool:
-        if message.text.lower() == "cancel":
-            return True
-        else:
-            return False
+        msg = message.text
+        if msg:
+            if msg.lower() == "cancel":
+                return True
+            else:
+                return False
+        
+class SubmitCommand(BaseFilter):
+    
+    async def __call__(self, message: Message) -> bool:
+        msg = message.text
+        if msg:
+            if msg.lower() == "submit assignment":
+                return True
+            else:
+                return False
         

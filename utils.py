@@ -12,5 +12,9 @@ class AssignmentCreateForm(StatesGroup):
     due_date = State()
     due_time = State()
 
+class SubmitAssignmentForm(StatesGroup):
+    file = State()
+    comment = State()
+
 # admins
 # students

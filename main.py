@@ -7,9 +7,10 @@ from aiogram.types import Message
 import local_settings as st
 import handlers
 import filters
-from commands import set_commands, CancelCommand
-from utils import StudentAddForm, AssignmentCreateForm as AForm
+from commands import set_commands, CancelCommand, SubmitCommand
+from utils import StudentAddForm, AssignmentCreateForm as AForm, SubmitAssignmentForm as SubmitForm
 from database import default_admins
+from keyboards import submit_a_btn
 
 
 bot = Bot(token=st.TOKEN)
@@ -29,7 +30,7 @@ async def greet_admin(message: Message, bot: Bot):
 async def greet(message: Message):
     await set_commands(bot)
     data = message.model_config.get("filter_result")
-    await message.answer(f"Welcome {data['name']}")
+    await message.answer(f"Welcome {data['name']}", reply_markup=submit_a_btn)
 
 async def start():
     # logging.basicConfig(level=logging.INFO)
@@ -43,6 +44,7 @@ async def start():
     dp.message.register(greet, CommandStart(), filters.IsStudent())
 
     dp.message.register(handlers.cancel_action, CancelCommand(), F.text)
+    dp.message.register(handlers.submit_assignment, filters.IsStudent(), SubmitCommand(), F.text)
     dp.message.register(handlers.create_assignment, filters.IsAdmin(), Command('create_assignment'))
     dp.message.register(handlers.add_student, filters.IsAdmin(), Command('student_add'))
     dp.message.register(handlers.get_name,  F.text, filters.IsAdmin(), StudentAddForm.name)
@@ -53,6 +55,8 @@ async def start():
     dp.message.register(handlers.get_date, F.text, filters.IsAdmin(), AForm.due_date)
     dp.message.register(handlers.get_time, F.text, filters.IsAdmin(), AForm.due_time)
 
+    dp.message.register(handlers.get_file, F.document, filters.IsStudent(), SubmitForm.file)
+    dp.callback_query.register(handlers.submit_callback, filters.IsStudent())
 
     try:
         await dp.start_polling(bot)

@@ -1,11 +1,12 @@
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from aiogram.fsm.context import FSMContext
+from aiogram import Bot
 from datetime import datetime
-from database import insert_student, check_student, insert_assignment
-from commands import set_commands
-from utils import StudentAddForm, AssignmentCreateForm
-from keyboards import cancel_btn
+from database import insert_student, check_student, insert_assignment, select_assignment, get_assignment, insert_file_metadata, insert_submission, convert_file_name
+from utils import StudentAddForm, AssignmentCreateForm, SubmitAssignmentForm
+from keyboards import cancel_btn, submit_assignment_btn, submit_a_btn
 from filters import validate_date, validate_time
+import os
 
 async def add_student(message: Message, state: FSMContext):
     await message.answer(text="Enter Student Full Name: ", reply_markup=cancel_btn)
@@ -62,7 +63,7 @@ async def get_date(message: Message, state: FSMContext):
         await message.answer(text="Enter Valid date format")
 
 async def get_time(message: Message, state: FSMContext):
-    if validate_date(message.text):
+    if validate_time(message.text):
         await state.update_data(due_time=message.text)
         
         data = await state.get_data()
@@ -81,8 +82,65 @@ async def get_time(message: Message, state: FSMContext):
 
         await state.clear()
     else:
-        await message.answer(text="Enter Valid time format")
+        await message.answer(text="Enter Valid time format", reply_markup=ReplyKeyboardRemove())
 
 
+async def submit_assignment(message: Message, state: FSMContext):
+    assignments = await select_assignment()
+    if len(assignments) > 0:
+        for obj in assignments:
+            await message.answer(text=f"{obj['title']}\n\nDue: {obj['due']}\n\nDescription:\n{obj['description']}", reply_markup=submit_assignment_btn(obj['_id']))
+        await message.answer(text="Choose assignment to submit")
+    else:
+        await message.answer(text="No Assignments")
+    # await state.set_state(SubmitAssignmentForm.file)
 
-    
+async def submit_callback(call: CallbackQuery, bot: Bot, state: FSMContext):
+    a_id = call.data.split('_')[1]
+    await state.update_data({'submit_id': a_id})
+    print('callback', a_id)
+    await state.set_state(SubmitAssignmentForm.file)
+    await call.message.answer('Submit your file', reply_markup=cancel_btn)
+    await call.answer() 
+
+async def get_file(message: Message, state: FSMContext, bot: Bot):
+    data = await state.get_data()
+    a_id = data['submit_id']
+    student = await check_student(message.from_user.id)
+    assignment = await get_assignment(a_id)
+
+    try:
+        file_id = message.document.file_id
+        file_info = await bot.get_file(file_id)
+        file_path = file_info.file_path
+        local_file_path = await convert_file_name(message.document.file_name)
+
+        await bot.download_file(file_path, local_file_path)
+
+         # Save file metadata to MongoDB
+        file_metadata = {
+            "file_name": message.document.file_name,
+            "file_size": message.document.file_size,
+            "file_id": file_id,
+            "user_id": message.from_user.id,
+            "local_path": local_file_path
+        }
+
+        metadata_saved = await insert_file_metadata(file_metadata)
+
+        if metadata_saved:
+            submission = {
+                'assignment': assignment,
+                'student': student,
+                'file': file_metadata,
+                'submitted_at': datetime.now()
+            }
+            submitted = await insert_submission(submission)
+
+            await message.reply(f"File submitted successfully", reply_markup=submit_a_btn)
+            await state.clear()
+        else: 
+            await message.reply(f"An error occurred")
+        
+    except Exception as e:
+        await message.reply(f"An error occurred: {e}")
