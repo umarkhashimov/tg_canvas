@@ -11,8 +11,8 @@ from commands import set_commands, CancelCommand
 from utils import StudentAddForm
 from database import default_admins
 
-bot = Bot(token=st.TOKEN)
 
+bot = Bot(token=st.TOKEN)
 async def start_notify(bot: Bot):
     for uid in st.DEFAULT_ADMINS:
         await bot.send_message(uid, text='Bot started')
@@ -22,19 +22,20 @@ async def stop_notify(bot: Bot):
         await bot.send_message(uid, text='Bot stopped')
 
 async def greet_admin(message: Message, bot: Bot):
+    await set_commands(bot)
     data = message.model_config.get("filter_result")
-    await set_commands(bot=bot,tgid=message.from_user.id)
     await message.answer(f"Welcome admin {data['name']}")
 
 async def greet(message: Message):
+    await set_commands(bot)
     data = message.model_config.get("filter_result")
-    await set_commands(bot=bot,tgid=message.from_user.id)
     await message.answer(f"Welcome {data['name']}")
 
 async def start():
     # logging.basicConfig(level=logging.INFO)
     dp = Dispatcher()
     await default_admins()
+    await set_commands(bot)
     
     # dp.startup.register(start_notify)
     # dp.shutdown.register(stop_notify)

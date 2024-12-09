@@ -10,6 +10,11 @@ async def check_admin(tg_id: int) -> bool:
 
     return document 
 
+async def get_all_admins():
+    data = [x for x in db['admins'].find()]
+    return data
+
+
 async def default_admins():
     for obj in st.DEFAULT_ADMINS:
         data = await check_admin(obj['tgid'])
