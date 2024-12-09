@@ -7,11 +7,10 @@ db = client[st.db_name]
 async def check_admin(tg_id: int) -> bool:
     document = db['admins'].find_one({'tg_id': str(tg_id)})
 
-    return document is not None
-
+    return document 
 
 
 async def check_student(tg_id: int) -> bool:
     document = db['students'].find_one({'tg_id': str(tg_id)})
 
-    return document is not None
+    return document 

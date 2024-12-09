@@ -7,6 +7,10 @@ from aiogram.types import Message
 import local_settings as st
 import handlers
 import filters
+from commands import set_commands
+from database import db
+
+bot = Bot(token=st.TOKEN)
 
 async def start_notify(bot: Bot):
     for uid in st.ADMIN_LIST:
@@ -17,11 +21,17 @@ async def stop_notify(bot: Bot):
         await bot.send_message(uid, text='Bot stopped')
 
 async def greet_admin(message: Message, bot: Bot):
-    await message.answer(text="Welcome Admin")
+    data = message.model_config.get("filter_result")
+    await set_commands(bot=bot,tgid=message.from_user.id)
+    await message.answer(f"Welcome {data['name']}")
+
+async def greet(message: Message):
+    data = message.model_config.get("filter_result")
+    await set_commands(bot=bot,tgid=message.from_user.id)
+    await message.answer(f"Welcome {data['name']}")
 
 async def start():
     # logging.basicConfig(level=logging.INFO)
-    bot = Bot(token=st.TOKEN)
     dp = Dispatcher()
 
     
@@ -29,7 +39,7 @@ async def start():
     # dp.shutdown.register(stop_notify)
     # dp.message.register(greet, CommandStart)
     dp.message.register(greet_admin, CommandStart(), filters.IsAdmin())
-    dp.message.register(handlers.greet, CommandStart(), filters.IsStudent())
+    dp.message.register(greet, CommandStart(), filters.IsStudent())
 
 
     try:
