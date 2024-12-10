@@ -33,13 +33,13 @@ async def greet(message: Message):
     await message.answer(f"Welcome {data['name']}", reply_markup=submit_a_btn)
 
 async def start():
-    # logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
     dp = Dispatcher()
     await default_admins()
     await set_commands(bot)
     
-    dp.startup.register(start_notify)
-    dp.shutdown.register(stop_notify)
+    # dp.startup.register(start_notify)
+    # dp.shutdown.register(stop_notify)
     dp.message.register(greet_admin, CommandStart(), filters.IsAdmin())
     dp.message.register(greet, CommandStart(), filters.IsStudent())
 
