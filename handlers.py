@@ -85,7 +85,7 @@ async def get_time(message: Message, state: FSMContext):
 
 
 async def submit_assignment(message: Message, state: FSMContext):
-    assignments = await select_assignment()
+    assignments = await select_assignment(message.from_user.id)
     if len(assignments) > 0:
         for obj in assignments:
             await message.answer(text=f"{obj['title']}\n\nDue: {obj['due']}\n\nDescription:\n{obj['description']}", reply_markup=submit_assignment_btn(obj['_id']))

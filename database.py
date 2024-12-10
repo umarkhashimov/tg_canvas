@@ -48,9 +48,25 @@ async def insert_assignment(data):
     except:
         return False
     
-async def select_assignment():
+async def is_submitted(assignment_id, user_id):
+    query = {
+        "$and": [
+            {"assignment._id": ObjectId(assignment_id)},
+            {"student.tgid": str(user_id)}
+        ]
+    }
+    submission = [x for x in db['submissions'].find(query)]
+    return len(submission) > 0
+
+async def select_assignment(userid):
     now = datetime.now()
-    assignments = [x for x in db['assignments'].find({'due': {'$gt': now}})]
+    query = db['assignments'].find({'due': {'$gt': now}})
+    assignments = []
+
+    for obj in query:
+        if not await is_submitted(obj['_id'], userid):
+            assignments.append(obj)
+            
     return assignments
 
 async def get_assignment(id):

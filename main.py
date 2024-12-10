@@ -16,11 +16,11 @@ from keyboards import submit_a_btn
 bot = Bot(token=st.TOKEN)
 async def start_notify(bot: Bot):
     for uid in st.DEFAULT_ADMINS:
-        await bot.send_message(uid, text='Bot started')
+        await bot.send_message(uid['tgid'], text='Bot started')
 
 async def stop_notify(bot: Bot):
     for uid in st.DEFAULT_ADMINS:
-        await bot.send_message(uid, text='Bot stopped')
+        await bot.send_message(uid['tgid'], text='Bot stopped')
 
 async def greet_admin(message: Message, bot: Bot):
     await set_commands(bot)
@@ -33,7 +33,7 @@ async def greet(message: Message):
     await message.answer(f"Welcome {data['name']}", reply_markup=submit_a_btn)
 
 async def start():
-    logging.basicConfig(level=logging.INFO)
+    # logging.basicConfig(level=logging.INFO)
     dp = Dispatcher()
     await default_admins()
     await set_commands(bot)
